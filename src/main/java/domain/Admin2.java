@@ -56,6 +56,14 @@ public class Admin2 implements Serializable {
 			return false;
 		return true;
 	}
+	@Override
+	public int hashCode() {
+		final int lehengusu = 31;
+		int erantzuna = 1;
+		erantzuna = lehengusu * erantzuna + ((username == null) ? 0 : username.hashCode());
+		return erantzuna;
+		
+	}
 
 	public String getMota() {
 		return mota;
