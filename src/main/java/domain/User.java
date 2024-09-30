@@ -19,7 +19,7 @@ public class User implements Serializable {
 
 	@XmlID
 	@Id
-	private String username;
+	protected String username;
 	private String passwd;
 	private String mota;
 	private double money;
@@ -119,6 +119,14 @@ public class User implements Serializable {
 		if (username != other.username)
 			return false;
 		return true;
+	}
+	@Override
+	public int hashCode() {
+		final int lehengusu = 31;
+		int erantzuna = 1;
+		erantzuna = lehengusu * erantzuna + ((username == null) ? 0 : username.hashCode());
+		return erantzuna;
+		
 	}
 
 }
