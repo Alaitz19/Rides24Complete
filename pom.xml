@@ -3,7 +3,6 @@
   <groupId>1.0</groupId>
   <artifactId>Rides24Complete</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-
 <build>
    <plugins>
 			<plugin>
