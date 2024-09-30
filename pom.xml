@@ -33,15 +33,6 @@
 					</execution>
 				</executions>
 			</plugin>
-			<plugin>
-         		 <groupId>org.apache.maven.plugins</groupId>
-         		 <artifactId>maven-surefire-plugin</artifactId>
-          		 <version>2.19.1</version>
-         		 <configuration>
-          		     <testFailureIgnore>true</testFailureIgnore>
-	   		    
-           		 </configuration>
-       		        </plugin>
 		</plugins>
 </build>
  <repositories>
@@ -58,7 +49,7 @@
     <sonar.organization>alaitz19</sonar.organization>
 	<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	<sonar.projectKey>Alaitz19_Rides24Complete</sonar.projectKey>
-	<sonar.login>e85974d4df5ddaad16baa89f5cc374da8839d538</sonar.login>
+	
 </properties>
 
 <!-- https://mvnrepository.com/artifact/junit/junit -->
