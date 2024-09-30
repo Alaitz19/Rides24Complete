@@ -21,11 +21,11 @@ public class Driver extends User implements Serializable {
 	private static final long serialVersionUID = 1L;
 	@XmlIDREF
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	private List<Car> cars = new ArrayList<Car>();
+	private List<Car> cars = new ArrayList<>();
 
 	@XmlIDREF
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	private List<Ride> createdRides = new ArrayList<Ride>();
+	private List<Ride> createdRides = new ArrayList<>();
 
 	public Driver(String username, String passwd) {
 		super(username, passwd, "Driver");
