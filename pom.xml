@@ -58,7 +58,7 @@
     <sonar.organization>alaitz19</sonar.organization>
 	<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 	<sonar.projectKey>Alaitz19_Rides24Complete</sonar.projectKey>
-	<sonar.login>f88b539dbaa0326fad3f09c2d18718d9233e6eeb</sonar.login>
+		<sonar.login>e85974d4df5ddaad16baa89f5cc374da8839d538</sonar.login>
 </properties>
 
 <!-- https://mvnrepository.com/artifact/junit/junit -->
@@ -66,7 +66,7 @@
 	<dependency>
   	  <groupId>junit</groupId>
   	  <artifactId>junit</artifactId>
-  	  <version>4.13.2</version>
+  	  <version>4.5</version>
  	   <scope>test</scope>
 	</dependency> 
 		<dependency>
@@ -108,26 +108,6 @@
 			<groupId>com.objectdb</groupId>
 			<artifactId>objectdb</artifactId>
 			<version>2.8.1</version>
-		</dependency>
-				<!-- https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy-agent -->
-		<dependency>
-			<groupId>net.bytebuddy</groupId>
-			<artifactId>byte-buddy-agent</artifactId>
-			<version>1.10.10</version>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/net.bytebuddy/byte-buddy -->
-		<dependency>
-			<groupId>net.bytebuddy</groupId>
-			<artifactId>byte-buddy</artifactId>
-			<version>1.10.10</version>
-		</dependency>
-		<!-- https://mvnrepository.com/artifact/org.objenesis/objenesis-tck -->
-		<dependency>
-			<groupId>org.objenesis</groupId>
-			<artifactId>objenesis-tck</artifactId>
-			<version>3.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.persistence</groupId>
