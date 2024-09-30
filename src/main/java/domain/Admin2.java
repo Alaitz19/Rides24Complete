@@ -12,7 +12,7 @@ import javax.xml.bind.annotation.XmlID;
 @XmlAccessorType(XmlAccessType.FIELD)
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-public class Admin2  extends User implements Serializable  {
+public class Admin2 implements Serializable  {
 
 	private static final long serialVersionUID = 1L;
 	@XmlID
@@ -22,7 +22,9 @@ public class Admin2  extends User implements Serializable  {
 	private String mota;
 
 	public Admin2(String username, String passwd) {
-		 super(username, passwd, "Admin");
+		this.username = username;
+		this.passwd = passwd;
+		this.setMota("Admin");
 	}
 
 	public String getUsername() {
@@ -56,7 +58,10 @@ public class Admin2  extends User implements Serializable  {
 	}
 	@Override
 	public int hashCode() {
-		return super.hashCode();
+		final int lehengusu = 31;
+		int erantzuna = 1;
+		erantzuna = lehengusu * erantzuna + ((username == null) ? 0 : username.hashCode());
+		return erantzuna;
 		
 	}
 
