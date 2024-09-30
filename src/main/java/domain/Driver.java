@@ -89,12 +89,7 @@ public class Driver extends User implements Serializable {
 	}
 	@Override
 	public int hashCode() {
-	    final int prime = 31;
-	    int result = super.hashCode(); 
-	    result = prime * result + ((username == null) ? 0 : username.hashCode());
-	    result = prime * result + ((cars == null) ? 0 : cars.hashCode());
-	    result = prime * result + ((createdRides == null) ? 0 : createdRides.hashCode());
-	    return result;
+	   return super.hashCode();
 	}
 
 	public Ride removeRide(String from, String to, Date date) {
