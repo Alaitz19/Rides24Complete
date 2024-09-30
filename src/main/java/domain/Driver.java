@@ -3,7 +3,7 @@ package domain;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import java.util.Vector;
+import java.util.ArrayList;
 
 import javax.persistence.*;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -21,10 +21,11 @@ public class Driver extends User implements Serializable {
 	private static final long serialVersionUID = 1L;
 	@XmlIDREF
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	private List<Car> cars = new Vector<Car>();;
+	private List<Car> cars = new ArrayList<Car>();
+
 	@XmlIDREF
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	private List<Ride> createdRides = new Vector<Ride>();
+	private List<Ride> createdRides = new ArrayList<Ride>();
 
 	public Driver(String username, String passwd) {
 		super(username, passwd, "Driver");
