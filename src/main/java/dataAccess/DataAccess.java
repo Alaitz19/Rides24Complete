@@ -30,6 +30,7 @@ public class DataAccess {
 	ConfigXML c = ConfigXML.getInstance();
 	
 	private String adminPass="admin";
+	private static final String  find_by_username = "SELECT d FROM Driver d WHERE d.username = :username";
 
 	public DataAccess() {
 		if (c.isDatabaseInitialized()) {
@@ -378,7 +379,7 @@ public class DataAccess {
 	}
 
 	public Driver getDriver(String erab) {
-		TypedQuery<Driver> query = db.createQuery("SELECT d FROM Driver d WHERE d.username = :username", Driver.class);
+		TypedQuery<Driver> query = db.createQuery(find_by_username, Driver.class);
 		query.setParameter("username", erab);
 		List<Driver> resultList = query.getResultList();
 		if (resultList.isEmpty()) {
@@ -412,7 +413,7 @@ public class DataAccess {
 	}*/
 
 	public String getMotabyUsername(String erab) {
-		TypedQuery<String> driverQuery = db.createQuery("SELECT d.mota FROM Driver d WHERE d.username = :username",
+		TypedQuery<String> driverQuery = db.createQuery(find_by_username,
 				String.class);
 		driverQuery.setParameter("username", erab);
 		List<String> driverResultList = driverQuery.getResultList();
@@ -623,7 +624,7 @@ public class DataAccess {
 	public List<Booking> getBookingFromDriver(String username) {
 		try {
 			db.getTransaction().begin();
-			TypedQuery<Driver> query = db.createQuery("SELECT d FROM Driver d WHERE d.username = :username",
+			TypedQuery<Driver> query = db.createQuery(find_by_username,
 					Driver.class);
 			query.setParameter("username", username);
 			Driver driver = query.getSingleResult();
@@ -682,7 +683,7 @@ public class DataAccess {
 	public List<Ride> getRidesByDriver(String username) {
 		try {
 			db.getTransaction().begin();
-			TypedQuery<Driver> query = db.createQuery("SELECT d FROM Driver d WHERE d.username = :username",
+			TypedQuery<Driver> query = db.createQuery(find_by_username,
 					Driver.class);
 			query.setParameter("username", username);
 			Driver driver = query.getSingleResult();
