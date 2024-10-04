@@ -6,6 +6,9 @@ import java.util.List;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import configuration.ConfigXML;
 import dataAccess.DataAccess;
 import domain.Ride;
@@ -26,10 +29,11 @@ import exceptions.RideAlreadyExistException;
  */
 @WebService(endpointInterface = "businessLogic.BLFacade")
 public class BLFacadeImplementation implements BLFacade {
+	 private static final Logger logger = Logger.getLogger(BLFacadeImplementation.class.getName());
 	DataAccess dbManager;
 
 	public BLFacadeImplementation() {
-		System.out.println("Creating BLFacadeImplementation instance");
+		 logger.log(Level.INFO, "Creating BLFacadeImplementation instance");
 
 		dbManager = new DataAccess();
 
@@ -39,7 +43,7 @@ public class BLFacadeImplementation implements BLFacade {
 
 	public BLFacadeImplementation(DataAccess da) {
 
-		System.out.println("Creating BLFacadeImplementation instance with DataAccess parameter");
+		logger.log(Level.INFO, "Creating BLFacadeImplementation instance with DataAccess parameter");
 		@SuppressWarnings("unused")
 		ConfigXML c = ConfigXML.getInstance();
 
