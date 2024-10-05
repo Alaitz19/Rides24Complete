@@ -1,5 +1,4 @@
 import static org.junit.Assert.*;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -8,6 +7,8 @@ import static org.mockito.Mockito.when;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
+import java.util.ArrayList;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -15,202 +16,158 @@ import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 
-
-import static org.mockito.Mockito.*;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
 import org.junit.After;
-
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-
 
 import dataAccess.DataAccess;
 import domain.Driver;
 import domain.Ride;
 import domain.Traveler;
 import domain.Booking;
-import java.util.*;
 
 public class BookRideMockWhiteTest {
-	
-	static DataAccess sut;
 
-	protected MockedStatic<Persistence> persistenceMock;
+    static DataAccess sut;
+    protected MockedStatic<Persistence> persistenceMock;
 
-	@Mock
-	protected EntityManagerFactory entityManagerFactory;
-	@Mock
-	protected EntityManager db;
-	@Mock
-	protected EntityTransaction et;
-	@Mock
-	private TypedQuery<Ride> rideQuery;
-	@Mock
+    @Mock
+    protected EntityManagerFactory entityManagerFactory;
+    @Mock
+    protected EntityManager db;
+    @Mock
+    protected EntityTransaction et;
+    @Mock
+    private TypedQuery<Ride> rideQuery;
+    @Mock
     TypedQuery<Traveler> travelerQuery;
-	@Mock
-	private TypedQuery<Driver> driverQuery;
 
-	@Before
-	public void init() {
-		MockitoAnnotations.openMocks(this);
-		persistenceMock = Mockito.mockStatic(Persistence.class);
-		persistenceMock.when(() -> Persistence.createEntityManagerFactory(Mockito.any()))
-				.thenReturn(entityManagerFactory);
+    @Before
+    public void init() {
+        MockitoAnnotations.openMocks(this);
+        persistenceMock = Mockito.mockStatic(Persistence.class);
+        persistenceMock.when(() -> Persistence.createEntityManagerFactory(Mockito.any()))
+                .thenReturn(entityManagerFactory);
+        Mockito.doReturn(db).when(entityManagerFactory).createEntityManager();
+        Mockito.doReturn(et).when(db).getTransaction();
+        sut = new DataAccess(db);
+    }
 
-		Mockito.doReturn(db).when(entityManagerFactory).createEntityManager();
-		Mockito.doReturn(et).when(db).getTransaction();
-		sut = new DataAccess(db);
-		  
-	       
-	}
+    @After
+    public void tearDown() {
+        persistenceMock.close();
+    }
 
-	@After
-	public void tearDown() {
-		persistenceMock.close();
-	}
+    private Ride createTestRide(String from, String to, int availableSeats, double price) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        Date rideDate = null;
 
+        try {
+            rideDate = sdf.parse("05/10/2026");
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return new Ride(from, to, rideDate, availableSeats, price, new Driver("Ane", "1234"));
+    }
 
-	@Test
-	// Test case 1: DB not entry
-	public void test1() {
-		 try {
-	            Mockito.verify(db, Mockito.times(0)).persist(Mockito.any());
-	        } catch (Exception e) {
-	            fail("Unexpected exception: " + e.getMessage());
-	        }
-	}
+    private Traveler createTestTraveler(String username, double money) {
+        Traveler traveler = new Traveler(username, "password");
+        traveler.setMoney(money);
+        return traveler;
+    }
 
-	@Test
-	// Test case 2: The Traveler "Mikel10" does not exist, should return false.
-	public void test2() {
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-		Date rideDate = null;
-		
-		try {
-			rideDate = sdf.parse("05/10/2026");
-		} catch (ParseException e) {
+    @Test
+    public void test1() {
+        try {
+            Mockito.verify(db, Mockito.times(0)).persist(Mockito.any());
+        } catch (Exception e) {
+            fail("Unexpected exception: " + e.getMessage());
+        }
+    }
 
-			e.printStackTrace();
-		}
-		Ride ride = new Ride("Donostia", "Zarautz", rideDate, 2, 10.0, new Driver("Ane", "1234"));
-		String travelerUsername = "Mikel10";
+    @Test
+    public void test2() {
+        String travelerUsername = "Mikel10";
+        Ride ride = createTestRide("Donostia", "Zarautz", 2, 10.0);
+        Mockito.when(db.find(Traveler.class, travelerUsername)).thenReturn(null);
 
-		Mockito.when(db.find(Traveler.class, travelerUsername)).thenReturn(null);
+        try {
+            sut.open();
+            boolean result = sut.bookRide(travelerUsername, ride, 2, 12.0);
+            sut.close();
 
-		try {
-			sut.open();
-			boolean result = sut.bookRide(travelerUsername, ride, 2, 12.0);
-			sut.close();
+            assertFalse(result); 
+        } catch (Exception e) {
+            fail();
+        }
+    }
 
-			assertFalse(result); // Expect false
-		} catch (Exception e) {
-			fail();
-		}
-	}
-	    
+    @Test
+    public void test3() {
+        String travelerUsername = "Mikel10";
+        Ride ride = createTestRide("Donostia", "Zarautz", 1, 10.0);
+        Mockito.when(db.find(Ride.class, ride.getRideNumber())).thenReturn(ride);
 
-	    @Test
-	    // Test case 3: Traveler tries to book more places than available in ride.
-	    public void test3() {
-	        String travelerUsername = "Mikel10";
-	        String rideFrom = "Donostia";
-	        String rideTo = "Zarautz";
-	        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-	        Date rideDate = null;
-	        try {
-	            rideDate = sdf.parse("05/10/2026");
-	        } catch (ParseException e) {
-	            e.printStackTrace();
-	        }
+        try {
+            sut.open();
+            boolean result = sut.bookRide(travelerUsername, ride, 2, 12.0);
+            sut.close();
 
-	        Ride ride = new Ride(rideFrom, rideTo, rideDate, 1, 10.0, new Driver("Ane", "1234"));
-	        Mockito.when(db.find(Ride.class, rideFrom)).thenReturn(ride);
+            assertFalse(result); 
+        } catch (Exception e) {
+            fail();
+        }
+    }
 
-	        try {
-	            sut.open();
-	            boolean result = sut.bookRide(travelerUsername, ride, 2, 12.0);
-	            sut.close();
+    @Test
+    public void test4() {
+        String travelerUsername = "Mikel10"; 
+        Traveler traveler = createTestTraveler(travelerUsername, 5.0); 
+        Ride ride = createTestRide("Donostia", "Zarautz", 2, 10.0);
+        
+        Mockito.when(db.find(Traveler.class, travelerUsername)).thenReturn(traveler);
+        Mockito.when(db.find(Ride.class, ride.getRideNumber())).thenReturn(ride);
 
-	            assertFalse(result); 
-	        } catch (Exception e) {
-	            fail();
-	        }
-	    }
+        try {
+            sut.open();
+            boolean result = sut.bookRide(travelerUsername, ride, 2, 5.0);
+            sut.close();
 
-	    @Test
-	    // Test case 4: Traveler has insufficient money to book the ride.
-	    public void test4() {
-	    	SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-			Date rideDate = null;
-			
-			try {
-				rideDate = sdf.parse("05/10/2026");
-			} catch (ParseException e) {
+            assertFalse(result); 
+        } catch (Exception e) {
+            fail();
+        }
+    }
 
-				e.printStackTrace();
-			}
-			Ride ride = new Ride("Donostia", "Zarautz", rideDate, 2, 10.0, new Driver("Ane", "1234"));
-			String travelerUsername = "Mikel10"; 
-			Traveler traveler = new Traveler(travelerUsername,"12"); 
-		    traveler.setMoney(5.0);
-	        Mockito.when(db.find(Traveler.class, travelerUsername)).thenReturn(traveler);
-	        Mockito.when(db.find(Ride.class, ride.getRideNumber())).thenReturn(ride);
+    @Test
+    public void test5() {
+        String travelerUsername = "Mikel10";
+        double initialBalance = 100.0;
+        double ridePrice = 10.0;
+        double discount = 2.0;
+        int seatsToBook = 2;
 
-	        try {
-	            sut.open();
-	            boolean result = sut.bookRide(travelerUsername, ride, 2, 5.0);
-	            sut.close();
+        Traveler traveler = createTestTraveler(travelerUsername, initialBalance);
+        List<Traveler> travelers = new ArrayList<>();
+        travelers.add(traveler);
+        Ride ride = createTestRide("Donostia", "Zarautz", 5, ridePrice);
+        
+        Mockito.when(db.createQuery(Mockito.anyString(), Mockito.any(Class.class))).thenReturn(travelerQuery);
+        Mockito.when(travelerQuery.getResultList()).thenReturn(travelers);
 
-	            assertFalse(result); 
-	        } catch (Exception e) {
-	            fail();
-	        }
-	    }
-	    
-	    @Test
-	 // Test case 5: Successfully booking a ride.
-	 public void test5() {
-	    	  // Arrange
-	        String travelerUsername = "Mikel10";
-	        double initialBalance = 100.0;
-	        double ridePrice = 10.0;
-	        double discount = 2.0;
-	        int seatsToBook = 2;
+        sut.open(); 
+        boolean result = sut.bookRide(travelerUsername, ride, seatsToBook, discount);
+        sut.close(); 
 
-	        // Create a Traveler with initial balance
-	        Traveler traveler = new Traveler(travelerUsername, "password");
-	        traveler.setMoney(initialBalance); // Traveler has enough money
-	        List<Traveler> tra= new ArrayList<Traveler>();
-	        tra.add(traveler);
-	        // Create a Driver
-	        Driver driver = new Driver("Juan", "driverPassword");
-
-	        // Create a Ride with enough available seats
-	        Ride ride = new Ride("Donostia", "Zarautz", new Date(), 5, ridePrice, driver);
-
-	        // Mock the Traveler query
-	        Mockito.when(db.createQuery(Mockito.anyString(), Mockito.any(Class.class))).thenReturn(travelerQuery);
-	        Mockito.when(travelerQuery.getResultList()).thenReturn(tra); // Return the traveler
-
-	        // Act
-	        sut.open(); // Open the entity manager
-	        boolean result = sut.bookRide(travelerUsername, ride, seatsToBook, discount);
-	        sut.close(); // Close the entity manager
-	        System.out.println(result);
-	        // Assert
-	        assertTrue(result); // The booking should be successful
-	       
-	        // Verify interactions
-	        verify(db).persist(any(Booking.class)); // Ensure a Booking was persisted
-	        verify(db).merge(ride); // Ensure the ride was updated
-	        verify(db).merge(traveler); // Ensure the traveler was updated
-	        verify(et).begin(); // Ensure the transaction began
-	        verify(et).commit(); // Ensure the transaction was committed
-	    }
-	    
+        assertTrue(result); 
+        verify(db).persist(any(Booking.class));
+        verify(db).merge(ride);
+        verify(db).merge(traveler);
+        verify(et).begin(); 
+        verify(et).commit(); 
+    }
 }

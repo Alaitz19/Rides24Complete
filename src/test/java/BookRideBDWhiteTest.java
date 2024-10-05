@@ -1,302 +1,127 @@
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import dataAccess.DataAccess;
-import domain.Ride;
-import exceptions.RideAlreadyExistException;
-import exceptions.RideMustBeLaterThanTodayException;
-import testOperations.TestDataAccess;
 import domain.Driver;
+import domain.Ride;
+import domain.Traveler;
+import testOperations.TestDataAccess;
+
+import java.util.Date;
 
 public class BookRideBDWhiteTest {
 
-	 //sut:system under test
-	 static DataAccess sut=new DataAccess();
-	 
-	 //additional operations needed to execute the test 
-	 static TestDataAccess testDA=new TestDataAccess();
+    private TestDataAccess testDA;
+    private DataAccess sut;
+    private Traveler traveler;
+    private Ride ride;
+    private Driver driver;
 
-	@SuppressWarnings("unused")
-	private Driver driver; 
+    @Before
+    public void setUp() {
+        testDA = new TestDataAccess();
+        sut = new DataAccess();
 
-	
-	@Test
-	//sut.createRide:  The Driver is null. The test must return null. If  an Exception is returned the createRide method is not well implemented.
-		public void test1() {
-		Ride ride=null;
-			try {
-				
-				//define parameters
-				driver=null;
+        // Abrir la conexión
+        testDA.open();
+        sut.open();
 
-				String rideFrom="Donostia";
-				String rideTo="Zarautz";
-				
-				String driverUsername=null;
+        // Crear datos de prueba
+        traveler = testDA.addTraveler("Mikel10", "password");
+        traveler.setMoney(100.0); // Dinero inicial del viajero
 
-				
-				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-				Date rideDate=null;;
-				try {
-					rideDate = sdf.parse("05/10/2026");
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}	
-				
-				
-				
-				//invoke System Under Test (sut)  
-				sut.open();
-			    ride=sut.createRide(rideFrom, rideTo, rideDate, 2, 10, driverUsername);
+        driver = testDA.createDriver("Driver1", "driverPassword");
+        ride = testDA.addRide(driver.getUsername(), "Donostia", "Zarautz", new Date(), 5, 50.0f);
+    }
 
-				//verify the results
-				assertNull(ride);
-				
-				
-			   } catch (RideAlreadyExistException e) {
-				// TODO Auto-generated catch block
-				// if the program goes to this point fail  
-				fail();
-				} catch (RideMustBeLaterThanTodayException e) {
-				// TODO Auto-generated catch block
-					fail();
-				} catch (Exception e) {
-				// TODO Auto-generated catch block
-					fail();
-					
-				} finally {
-					sut.close();
-				}
-					   }
-	@Test
-	//sut.createRide:  The Driver("Driver Test") does not exist in the DB. The test must return null 
-	//The test supposes that the "Driver Test" does not exist in the DB
-	public void test2() {
-		
-		String driverUsername="Driver Test";
+    @After
+    public void tearDown() {
+        try {
+            // Cerrar sesión del viajero solo si existe
+            if (traveler != null) {
+                testDA.removeTraveler(traveler.getUsername());
+            }
+            // Cerrar sesión del conductor solo si existe
+            if (driver != null) {
+                testDA.removeDriver(driver.getUsername());
+            }
+            // Eliminar viaje solo si existe
+            if (ride != null) {
+                testDA.removeRide(driver.getUsername(), "Donostia", "Zarautz", ride.getDate());
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); 
+        } finally {
+            testDA.close(); 
+            sut.close(); 
+        }
+    }
+   
 
-		String rideFrom="Donostia";
-		String rideTo="Zarautz";
-		
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-		Date rideDate=null;;
-		try {
-			rideDate = sdf.parse("05/10/2026");
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
-		try {
-			
-			//define parameters
-					
-			
-			//invoke System Under Test (sut)  
-			sut.open();
-		    Ride r=sut.createRide(rideFrom, rideTo, rideDate, 0, 0, driverUsername);
-			sut.close();
-			
-			assertNull(r);
-			
-		   } catch (RideAlreadyExistException e) {
-			 //verify the results
-				sut.close();
-				fail();
-			} catch (RideMustBeLaterThanTodayException e) {
-			// TODO Auto-generated catch block
-			sut.close();
-			fail();
-		} 
-		   } 
-	@Test
-	//sut.createRide:  the date of the ride must be later than today. The RideMustBeLaterThanTodayException 
-	// exception must be thrown. 
-	public void test3() {
-		
-		String driverUsername="Driver Test";
-		String driverPassword="123";
+    @Test
+    public void testTravelerNotInDatabase() {
+        // Asegúrate de que el viajero no está en la base de datos
+        String travelerUsername = "Mikel10";
+       
+        testDA.removeTraveler(travelerUsername);
+        try {
+            // Intentar reservar para un viajero que no está en la base de datos
+            boolean result = sut.bookRide(travelerUsername, ride, 2, 12.0);
 
-		String rideFrom="Donostia";
-		String rideTo="Zarautz";
-		
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-		Date rideDate=null;;
-		
-		boolean driverCreated=false;
+            // Verificar que no se pudo hacer la reserva
+            assertFalse("La reserva no debería ser posible porque el viajero no está en la base de datos", result);
+        } catch (Exception e) {
+            fail("No debería lanzar excepción: " + e.getMessage());
+        }
+    }
 
-		try {
-			rideDate = sdf.parse("05/10/2018");
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
-		try {
-			
-			//define parameters
-			testDA.open();
-			if (!testDA.existDriver(driverUsername)) {
-				testDA.createDriver(driverUsername,driverPassword);
-			    driverCreated=true;
-			}
-			testDA.close();		
-			
-			//invoke System Under Test (sut)  
-			sut.open();
-		    sut.createRide(rideFrom, rideTo, rideDate, 2, 10, driverUsername);
-			sut.close();
-			
-			fail();
-			
-		   } catch (RideMustBeLaterThanTodayException  e) {
-			 //verify the results
-				sut.close();
-				assertTrue(true);
-			} catch (RideAlreadyExistException e) {
-				sut.close();
-				fail();
-		} finally {
-				  //Remove the created objects in the database (cascade removing)   
-				testDA.open();
-				  if (driverCreated) 
-					  testDA.removeDriver(driverUsername);
-		          testDA.close();
-		        }
-		   } 
+    @Test
+    public void testInsufficientFunds() {
+    	 // Crear un nuevo viajero específico para esta prueba
+        String travelerUsername = "TravelerWithInsufficientFunds";
+        Traveler traveler = testDA.addTraveler(travelerUsername, "password");
+        traveler.setMoney(2.0); // Fondos insuficientes para el viaje
 
-	@Test
-	//sut.createRide:  The Driver("Driver Test") HAS  one ride "from" "to" in that "date". 
-	// and the Exception RideAlreadyExistException must be thrown
-	public void test4() {
-		//define paramaters
-		String driverUsername="Driver Test";
+        try {
+     
+            // Intentar hacer la reserva
+            boolean result = sut.bookRide(traveler.getUsername(), ride, 2, 0); // Sin descuento
+       
+            // Verificar que no se puede realizar la reserva debido a fondos insuficientes
+            assertFalse("No debería poder reservar con fondos insuficientes", result);
+        } catch (Exception e) {
+            // Si se lanza una excepción, el test fallará con un mensaje
+            fail("No debería lanzar excepción: " + e.getMessage());
+        }
+    }
 
-		String rideFrom="Donostia";
-		String rideTo="Zarautz";
-		
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-		Date rideDate=null;;
-		
+    @Test
+    public void testNotEnoughSeats() {
+        try {
+            // Reservar más asientos de los disponibles
+            boolean result = sut.bookRide(traveler.getUsername(), ride, 6, 0); 
+            assertFalse("No debería poder reservar más asientos de los que hay disponibles", result);
+        } catch (Exception e) {
+            fail("No debería lanzar excepción: " + e.getMessage());
+        }
+    }
+    
+    @Test
+    public void testSuccessfulBooking() {
+    	try {
+            // Reservar con éxito
+            boolean result = sut.bookRide(traveler.getUsername(), ride, 2, 10.0); // Reservar con descuento
+            assertTrue("La reserva debería ser exitosa", result);
+        } catch (Exception e) {
+            fail("No debería lanzar excepción: " + e.getMessage());
+        }
 
-		try {
-			rideDate = sdf.parse("05/10/2026");
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
-		
-		try {
-			//Create a driver and her ride
-			
-			testDA.open();
-			testDA.addDriverWithRide( driverUsername,  rideFrom,  rideTo,   rideDate,2,10);
-			testDA.close();
-			
-			
-			//invoke System Under Test (sut)  
-			sut.open();
-			Ride ride=sut.createRide(rideFrom, rideTo, rideDate, 2, 10, driverUsername);
-			
-			//if the program goes to this point fail
-			fail();
-		
-			
-		   } catch (RideAlreadyExistException e) {
-			// if the program goes to this point fail  
-				assertTrue(true);
-			
-			
-			} catch (RideMustBeLaterThanTodayException e) {
-				fail();
-				// if the program goes to this point fail  
-			
-		} finally {
-			sut.close();
-			testDA.open();
-			//reestablish the state of the system (remove the driver and her rides in the database)
-
-				testDA.removeDriver(driverUsername);
-
-			testDA.close();	      
-		        }
-		   } 
-	
-	
-	
-	@Test
-	//sut.createRide:  The Driver("Driver Test") HAS  NOT one ride "from" "to" in that "date". 
-	// and the Ride must be created in DB
-	//The test supposes that the "Driver Test" does not exist in the DB before the test
-
-	public void test5() {
-		boolean driverCreated=false;
-		String driverUsername="Driver Test";
-		String rideFrom="Donostia";
-		String rideTo="Zarautz";
-		
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-		Date rideDate=null;;
-		try {
-			rideDate = sdf.parse("05/10/2026");
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}	
-		Ride ride=null;
-		
-		testDA.open();
-		
-			testDA.createDriver(driverUsername,null);
-		
-		testDA.close();
-		try {
-			//invoke System Under Test (sut)  
-			sut.open();
-			 ride=sut.createRide(rideFrom, rideTo, rideDate, 2, 10, driverUsername);
-			sut.close();			
-			
-			//verify the results
-			assertNotNull(ride);
-			
-			//q is in DB
-			testDA.open();
-			boolean exist=testDA.existRide(driverUsername,rideFrom, rideTo, rideDate);
-				
-			assertTrue(exist);
-			testDA.close();
-			
-		   } catch (RideAlreadyExistException e) {
-			// TODO Auto-generated catch block
-			// if the program goes to this point fail  
-			fail();
-			} catch (RideMustBeLaterThanTodayException e) {
-
-			// TODO Auto-generated catch block
-			fail();
-			}  catch (Exception e) {
-			// TODO Auto-generated catch block
-			fail();
-			}    
-		
-		
-		finally {   
-
-			testDA.open();
-				testDA.removeDriver(driverUsername);
-			testDA.close();
-			
-		        }
-		   }
-		   
-	@Test
-	public void test6() {}  
+      
+    }
+    
 }

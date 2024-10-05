@@ -11,9 +11,10 @@ import javax.persistence.Persistence;
 import configuration.ConfigXML;
 import domain.Driver;
 import domain.Ride;
+import domain.Traveler;
 
 
-public class TestDataAccess {
+public class TestDataAccess  {
 	protected  EntityManager  db;
 	protected  EntityManagerFactory emf;
 
@@ -50,6 +51,7 @@ public class TestDataAccess {
 
 		
 	}
+
 	public void close(){
 		db.close();
 		System.out.println("TestDataAccess closed");
@@ -132,6 +134,70 @@ public class TestDataAccess {
 			} else 
 			return null;
 
+		}
+		 public Traveler addTraveler(String username, String password) {
+		        System.out.println(">> TestDataAccess: addTraveler");
+		        Traveler traveler = null;
+		        db.getTransaction().begin();
+		        try {
+		            traveler = new Traveler(username, password);
+		            db.persist(traveler);
+		            db.getTransaction().commit();
+		        } catch (Exception e) {
+		            e.printStackTrace();
+		            if (db.getTransaction().isActive()) {
+		                db.getTransaction().rollback();
+		            }
+		        }
+		        return traveler;
+		    }
+		public boolean removeTraveler(String username) {
+		    System.out.println(">> TestDataAccess: removeTraveler");
+		    Traveler traveler = db.find(Traveler.class, username);
+		    if (traveler != null) {
+		        db.getTransaction().begin();
+		        db.remove(traveler);
+		        db.getTransaction().commit();
+		        return true;
+		    } else {
+		        return false;
+		    }
+		}
+		public Ride addRide(String driverName, String from, String to, Date date, int nPlaces, float price) {
+		    System.out.println(">> TestDataAccess: addRide");
+		    Ride ride = null;
+		    db.getTransaction().begin();
+		    try {
+		        // Busca el conductor por su nombre
+		        Driver driver = db.find(Driver.class, driverName);
+		        
+		        // Si el conductor no existe, lanza un error
+		        if (driver == null) {
+		            System.out.println("El conductor no existe: " + driverName);
+		            return null;
+		        }
+
+		        // Verifica si el viaje ya existe
+		        if (driver.doesRideExists(from, to, date)) {
+		            System.out.println("El viaje ya existe.");
+		            return null; // El viaje ya existe
+		        }
+
+		        // Crea el viaje
+		        ride = driver.addRide(from, to, date, nPlaces, price);
+		        
+		        // Persiste el conductor con el nuevo viaje
+		        db.persist(driver);
+		        db.getTransaction().commit();
+		        
+		        System.out.println("Viaje creado: " + ride);
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		        if (db.getTransaction().isActive()) {
+		            db.getTransaction().rollback(); // Deshacer cambios en caso de error
+		        }
+		    }
+		    return ride; // Retorna el viaje creado o null si falló
 		}
 
 
