@@ -152,11 +152,15 @@ public class BookRideMockBlackTest {
     public void testBookRide_SeatsNotZero() {
         setupTravelerQueryWithResults(); // Mock lleno para el Traveler
         setupRideQueryWithResults(); // Mock lleno para el Ride
+        String expectedMessage = "Ezin dituzu 0 eserleku erreserbatu";
 
-        ride.setnPlaces(0); // Sin asientos disponibles
-
-        // Intentar reservar 2 asientos, lo cual debería fallar
-        assertFalse("No hay suficientes asientos disponibles", sut.bookRide(USERNAME, ride, 2, DISCOUNT));
+        try {
+        	sut.bookRide(USERNAME, ride, 0, DISCOUNT);
+          fail("Se esperaba IllegalArgumentException, pero no se lanzó"); // Asegurarse de que la excepción se lance
+    } catch (IllegalArgumentException e) {
+        String actualMessage = e.getMessage();
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
     }
     
  // Test case: desk <= 0 (descuento no válido)
@@ -166,7 +170,7 @@ public class BookRideMockBlackTest {
         setupRideQueryWithResults(); // Mock lleno para el Ride
 
         double desk = -5; // Descuento negativo
-        String expectedMessage = "El desk debe ser mayor que 0.0";
+        String expectedMessage = "Deskontua 0 baino handiagoa izan behar du";
 
         try {
             sut.bookRide(USERNAME, ride, SEATS, desk);
@@ -182,7 +186,7 @@ public class BookRideMockBlackTest {
         setupTravelerQueryWithResults(); // Mock lleno para el Traveler
         setupRideQueryWithZeroPrice(); // Mock para el Ride con precio 0.0
 
-        String expectedMessage = "El precio del viaje no puede ser cero o negativo";
+        String expectedMessage = "Bidaiaren prezioa ezin du zero edo negatiboa izan";
         try {
             sut.bookRide(USERNAME, ride, SEATS, DISCOUNT);
             fail("Se esperaba IllegalArgumentException, pero no se lanzó"); // Asegurarse de que la excepción se lance

@@ -36,7 +36,7 @@ public class BookRideBDBlackTest {
         traveler.setMoney(100.0); // Dinero inicial del viajero
 
         driver = testDA.createDriver("Driver1", "driverPassword");
-        ride = testDA.addRide(driver.getUsername(), "Donostia", "Zarautz", new Date(), 6, 50.0f);
+        ride = testDA.addRide(driver.getUsername(), "Donostia", "Zarautz", new Date(), 2, 50.0f);
     }
 
     @After
@@ -77,7 +77,7 @@ public class BookRideBDBlackTest {
     @Test
     public void testBookRide_RideNotFound() {
         // Intentar reservar un viaje que no existe
-        boolean result = sut.bookRide(traveler.getUsername(), null, 2, 12.0);
+        boolean result = sut.bookRide(traveler.getUsername(), null, 2, 5.0);
 
         // Verificar que no se pudo hacer la reserva
         assertFalse("La reserva no debería ser posible porque el viaje no existe", result);
@@ -86,11 +86,15 @@ public class BookRideBDBlackTest {
     // Test case: seats == 0
     @Test
     public void testBookRide_SeatsNotZero() {
-        ride.setnPlaces(0); // Sin asientos disponibles
-
-        // Intentar reservar 2 asientos, lo cual debería fallar
-        boolean result = sut.bookRide(traveler.getUsername(), ride, 2, 12.0);
-        assertFalse("No hay suficientes asientos disponibles", result);
+      try {
+        // Intentar reservar 0 asientos, lo cual debería fallar
+        sut.bookRide(traveler.getUsername(), ride, 0, 5.0);
+        fail("Se esperaba IllegalArgumentException, pero no se lanzó");
+    } catch (IllegalArgumentException e) {
+        String expectedMessage = "El desk debe ser mayor que 0.0";
+        assertTrue(e.getMessage().contains(expectedMessage));
+    }
+       
     }
     
     // Test case: desk <= 0 (descuento no válido)
@@ -128,7 +132,7 @@ public class BookRideBDBlackTest {
 
         try {
             // Intentar reservar 2 asientos
-            boolean result = sut.bookRide(traveler.getUsername(), ride, 2, 12.0);
+            boolean result = sut.bookRide(traveler.getUsername(), ride, 2, 5.0);
             assertFalse("No debería poder reservar más asientos de los que hay disponibles", result);
         } catch (Exception e) {
             fail("Se lanzó una excepción inesperada: " + e.getMessage());
