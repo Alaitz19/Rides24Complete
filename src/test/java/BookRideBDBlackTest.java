@@ -1,4 +1,4 @@
-/*
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -16,7 +16,7 @@ import domain.Traveler;
 import testOperations.TestDataAccess;
 
 public class BookRideBDBlackTest {
-
+/*
     private TestDataAccess testDA;
     private DataAccess sut;
     private Traveler traveler;
@@ -159,5 +159,6 @@ public class BookRideBDBlackTest {
             fail("Se lanzó una excepción inesperada: " + e.getMessage());
         }
     }
+    */
 }
-*/
+

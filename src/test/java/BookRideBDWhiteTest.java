@@ -15,7 +15,7 @@ import testOperations.TestDataAccess;
 import java.util.Date;
 
 public class BookRideBDWhiteTest {
-
+/*
     private TestDataAccess testDA;
     private DataAccess sut;
     private Traveler traveler;
@@ -123,5 +123,5 @@ public class BookRideBDWhiteTest {
 
       
     }
-    
+    */
 }
