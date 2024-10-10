@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import configuration.ConfigXML;
 import dataAccess.DataAccess;
+import dataAccess.DataAccess.ReklamazioaData;
 import domain.Ride;
 import domain.Traveler;
 import domain.User;
@@ -326,7 +327,8 @@ public class BLFacadeImplementation implements BLFacade {
 	@Override
 	public boolean erreklamazioaBidali(String nor, String nori, Date gaur, Booking book, String textua, boolean aurk) {
 		dbManager.open();
-		boolean sent = dbManager.erreklamazioaBidali(nor, nori, gaur, book, textua, aurk);
+		ReklamazioaData data = new ReklamazioaData(nor, nori, gaur, book, textua, aurk);
+		boolean sent = dbManager.erreklamazioaBidali(data);
 		dbManager.close();
 		return sent;
 	}
@@ -451,6 +453,12 @@ public class BLFacadeImplementation implements BLFacade {
 		Complaint er = dbManager.getComplaintsByBook(book);
 		dbManager.close();
 		return er;
+	}
+
+	@Override
+	public boolean erreklamazioaBidali(ReklamazioaData data) {
+		// TODO Auto-generated method stub
+		return false;
 	}
 
 }

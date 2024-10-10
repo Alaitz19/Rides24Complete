@@ -22,6 +22,8 @@ import exceptions.RideAlreadyExistException;
 import javax.jws.WebMethod;
 import javax.jws.WebService;
 
+import dataAccess.DataAccess.ReklamazioaData;
+
 /**
  * Interface that specifies the business logic.
  */
@@ -180,5 +182,7 @@ public interface BLFacade {
 	public boolean deleteAlert(int alertNumber);
 
 	public Complaint getComplaintsByBook(Booking bo);
+
+	boolean erreklamazioaBidali(ReklamazioaData data);
 
 }
