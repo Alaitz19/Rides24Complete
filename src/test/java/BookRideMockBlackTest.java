@@ -31,7 +31,7 @@ import domain.Ride;
 import domain.Traveler;
 
 public class BookRideMockBlackTest {
-	/*
+	
     static DataAccess sut;
     protected MockedStatic<Persistence> persistenceMock;
 
@@ -219,6 +219,6 @@ public class BookRideMockBlackTest {
         // Intentar reservar 2 asientos con un descuento de 5.0
         assertFalse(sut.bookRide(USERNAME, ride, SEATS, DISCOUNT));
     }
-*/
+
   
 } 

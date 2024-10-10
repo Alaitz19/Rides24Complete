@@ -57,17 +57,7 @@ public class TestDataAccess  {
 		System.out.println("TestDataAccess closed");
 	}
 
-	public boolean removeDriver(String name) {
-		System.out.println(">> TestDataAccess: removeDriver");
-		Driver d = db.find(Driver.class, name);
-		if (d!=null) {
-			db.getTransaction().begin();
-			db.remove(d);
-			db.getTransaction().commit();
-			return true;
-		} else 
-		return false;
-    }
+
 	public Driver createDriver(String name, String pass) {
 		System.out.println(">> TestDataAccess: addDriver");
 		Driver driver=null;
@@ -199,6 +189,23 @@ public class TestDataAccess  {
 		    }
 		    return ride; // Retorna el viaje creado o null si falló
 		}
+
+
+		public boolean removeDriver(String username) {
+			 System.out.println(">> TestDataAccess: removeTraveler");
+			    Traveler traveler = db.find(Traveler.class, username);
+			    if (traveler != null) {
+			        db.getTransaction().begin();
+			        db.remove(traveler);
+			        db.getTransaction().commit();
+			    
+			    return true;
+			    }
+			    else {
+			    	return false;
+			    }
+		}
+		
 
 
 		

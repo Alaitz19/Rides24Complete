@@ -31,7 +31,7 @@ import domain.Traveler;
 import domain.Booking;
 
 public class BookRideMockWhiteTest {
-/*
+
     static DataAccess sut;
     protected MockedStatic<Persistence> persistenceMock;
 
@@ -170,5 +170,5 @@ public class BookRideMockWhiteTest {
         verify(et).begin(); 
         verify(et).commit(); 
     }
-    */
+    
 }
