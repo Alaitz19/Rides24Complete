@@ -9,6 +9,7 @@ import domain.Ride;
 
 public class DriverAdapter extends AbstractTableModel{
 
+	
 	protected Driver driver;
 	 protected String[] columnNames =
 			    new String[] {"From", "To", "Date", "Places", "Price" };
