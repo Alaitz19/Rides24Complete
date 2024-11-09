@@ -1,69 +1,49 @@
 package gui;
 
-import java.net.URL;
+import java.awt.Color;
+
 import java.util.Locale;
 
 import javax.swing.UIManager;
-import javax.xml.namespace.QName;
-import javax.xml.ws.Service;
+
 
 import configuration.ConfigXML;
-import dataAccess.DataAccess;
 import businessLogic.BLFacade;
-import businessLogic.BLFacadeImplementation;
+import businessLogic.BLFacadeFactory;
 
 public class ApplicationLauncher {
 
 	public static void main(String[] args) {
+	    ConfigXML c = ConfigXML.getInstance();
 
-		ConfigXML c = ConfigXML.getInstance();
+	    try {
+	        
+	        System.out.println(c.getLocale());
+	        Locale.setDefault(new Locale(c.getLocale()));
+	        System.out.println("Locale: " + Locale.getDefault());
 
-		System.out.println(c.getLocale());
+	       
+	        MainGUI a = new MainGUI();
+	        a.setVisible(true);
 
-		Locale.setDefault(new Locale(c.getLocale()));
+	       
+	        BLFacade appFacadeInterface;
+	        UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
 
-		System.out.println("Locale: " + Locale.getDefault());
+	        BLFacadeFactory factory = new BLFacadeFactory();
+            appFacadeInterface = factory.BLFacadeCreator(c.isBusinessLogicLocal());
 
-		try {
+	    
+	        MainGUI.setBussinessLogic(appFacadeInterface);
 
-			BLFacade appFacadeInterface;
-			UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-
-			if (c.isBusinessLogicLocal()) {
-
-				DataAccess da = new DataAccess();
-				appFacadeInterface = new BLFacadeImplementation(da);
-
-			}
-
-			else { // If remote
-
-				String serviceName = "http://" + c.getBusinessLogicNode() + ":" + c.getBusinessLogicPort() + "/ws/"
-						+ c.getBusinessLogicName() + "?wsdl";
-
-				URL url = new URL(serviceName);
-
-				// 1st argument refers to wsdl document above
-				// 2nd argument is service name, refer to wsdl document above
-				QName qname = new QName("http://businessLogic/", "BLFacadeImplementationService");
-
-				Service service = Service.create(url, qname);
-
-				appFacadeInterface = service.getPort(BLFacade.class);
-			}
-
-			MainGUI.setBussinessLogic(appFacadeInterface);
-			MainGUI a = new MainGUI();
-			a.setVisible(true);
-
-		} catch (Exception e) {
-			// a.jLabelSelectOption.setText("Error: "+e.toString());
-			// a.jLabelSelectOption.setForeground(Color.RED);
-
-			System.out.println("Error in ApplicationLauncher: " + e.toString());
-		}
-		// a.pack();
-
+	    } catch (Exception e) {
+	      
+	        MainGUI a = new MainGUI(); 
+	        a.jLabelSelectOption.setText("Error: " + e.toString());
+	        a.jLabelSelectOption.setForeground(Color.RED);
+	        System.out.println("Error in ApplicationLauncher: " + e.toString());
+	    }
 	}
+
 
 }

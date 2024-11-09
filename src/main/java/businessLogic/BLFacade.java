@@ -29,6 +29,7 @@ import dataAccess.DataAccess.ReklamazioaData;
  */
 @WebService
 public interface BLFacade {
+	
 
 	/**
 	 * This method returns all the cities where rides depart
@@ -184,5 +185,7 @@ public interface BLFacade {
 	public Complaint getComplaintsByBook(Booking bo);
 
 	boolean erreklamazioaBidali(ReklamazioaData data);
+
+	public ExtendedIterator<String> getDepartingCitiesIterator();
 
 }
